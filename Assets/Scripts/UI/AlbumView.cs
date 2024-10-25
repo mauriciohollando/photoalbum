@@ -27,6 +27,7 @@ public class AlbumView : MonoBehaviour
         logButton.onClick.AddListener(PrintLogs);
         
         ThumbnailEventManager.OnThumbnailClicked += HandleThumbnailClicked;
+        ThumbnailEventManager.OnThumbnailDeleted += HandleThumbnailDeleted;
     }
 
     public void PrintLogs()
@@ -69,10 +70,30 @@ public class AlbumView : MonoBehaviour
                 Destroy(view.gameObject);
                 idsToThumbnailViews.Remove(selectedEntry.Id);
             }
-            
+
             albumEntries.Remove(selectedEntry);
             entryView.UpdateView(null);
-            albumEntryManager.DeleteSelectedEntry();
+
+            // Notify the 3D view of the deletion, but don't call the manager delete again
+            ThumbnailEventManager.RaiseThumbnailDeleted(selectedEntry);
+            selectedEntry = null;
         }
+    }
+
+    private void HandleThumbnailDeleted(IAlbumEntry deletedEntry)
+    {
+        if (selectedEntry == deletedEntry)
+        {
+            selectedEntry = null;
+            entryView.UpdateView(null);
+        }
+
+        if (idsToThumbnailViews.TryGetValue(deletedEntry.Id, out ThumbnailView view))
+        {
+            Destroy(view.gameObject);
+            idsToThumbnailViews.Remove(deletedEntry.Id);
+        }
+        
+        albumEntries.Remove(deletedEntry);
     }
 }

@@ -14,6 +14,11 @@ public class EntryView3D : MonoBehaviour
             titleText.text = entry.Title;
             LoadLargeImage(entry.Url);
         }
+        else
+        {
+            largeImageRenderer.gameObject.SetActive(false);
+            titleText.text = "";
+        }
     }
 
     private async void LoadLargeImage(string url)
@@ -24,6 +29,7 @@ public class EntryView3D : MonoBehaviour
             Texture2D texture = await imageLoadingService.LoadImageAsync(url);
             if (texture != null)
             {
+                largeImageRenderer.gameObject.SetActive(true);
                 largeImageRenderer.material.mainTexture = texture;
             }
         }
